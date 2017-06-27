@@ -2,10 +2,6 @@
 
 _2015011330 计54 陈驰_
 
-<h3>目录</h3>
-
-[TOC]
-
 ## 概要
 
 本次实验我完成了如下内容:
@@ -30,7 +26,7 @@ _2015011330 计54 陈驰_
 
 选用了两段三次Bézier曲线和一段二次Bézier曲线进行拼接，并旋转一圈得到了旋转体（以下简称Bézier物体）。造型灵感来自于盗梦空间中的经典物像陀螺，最终效果如下：
 
-<img src="tl.jpg" width="370px"> <img src="bezier.png" width="400px">
+<img src="img/tl.jpg" width="370px"> <img src="img/bezier.png" width="400px">
 
 ## 图片渲染
 
@@ -58,14 +54,16 @@ _2015011330 计54 陈驰_
     };
 ```
     
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;之后，将所有得到的采样点按照它们的空间位置建立一棵kd-tree，以便之后进行快速查找。
+之后，将所有得到的采样点按照它们的空间位置建立一棵kd-tree，以便之后进行快速查找。
 
 - __发射光子__
 
     由每个光源不断发射光子，做与第一步中类似的操作，直到漫反射面时，通过其位置在kd-tree中进行查询，找到所有能够贡献的采样点，并更新它们的信息。注意到光子的信息并不需要存储，只要在追踪时递归的传递下去即可。采样点更新的公式如下：
 
-    $$R_{i+1}^{2} = R_{i}^{2}\frac{N_{i} + \alpha{M_{i}}}{N_{i} + M_{i}}$$
-    $$\tau_{i+1} = \tau_{i}\frac{N_{i} + \alpha{M_{i}}}{N_{i} + M_{i}}$$
+
+<img src="http://latex.codecogs.com/gif.latex?R_{i+1}^{2} = R_{i}^{2}\frac{N_{i} + \alpha{M_{i}}}{N_{i} + M_{i}}" style="margin-left: 40%;">
+
+<img src="http://latex.codecogs.com/gif.latex?\tau_{i+1} = \tau_{i}\frac{N_{i} + \alpha{M_{i}}}{N_{i} + M_{i}}" style="margin-left: 40%;">
 
 ```c++
     /* 发射光子 */
@@ -169,27 +167,27 @@ _2015011330 计54 陈驰_
 
 我采用的方法是对要求交的曲面和直线建立对应的方程，通过牛顿迭代法求交，需要求交的方程如下：
 
-$$F(x) = F(t,u,v) \triangleq{L(t) - P(u,v)} = 0$$
+<img src="http://latex.codecogs.com/gif.latex?F(x) = F(t,u,v) \triangleq{L(t) - P(u,v)} = 0" style="margin-left: 40%;">
 
 其中L(t)和P(u,v)分别是直线和曲面的参数方程。
 
 牛顿迭代法公式为
 
-$$x_{i+1} = x_{i} - [F^{'}(x)]^{-1} \dot{} F(x)$$
+<img src="http://latex.codecogs.com/gif.latex?x_{i+1} = x_{i} - [F^{'}(x)]^{-1} \dot{} F(x)" style="margin-left: 40%;">
 
 使用Eigen库进行矩阵的求逆功能，满足一定的效率需求。
 
 由于牛顿迭代法的收敛性需要F(x)在初始点局部满足Lipschitz条件，因而初始点的选取直接决定了算法的可靠性和效率。起初，我选择在定义域范围内随机撒点，结果发现效果很差，很多本来相交的地方都没能收敛到。之后我尝试了对曲面建立包围盒，并用直线与包围盒最近的交点作为迭代初始解，发现效果依然不尽如人意。和同学讨论后，最终选择了如下方法求交：
 
-1. 初始时，设定 $u_{1} = 0$，$u_{2} = 1$; 
+1. 初始时，设定u1=0,u2=1; 
 
 2. 对u1和u2为参数的曲线点建立两个圆柱包围体;
 
 3. 检查曲线是否能够通过两个圆柱包围体中间，若不能通过，则返回无交点;
 
-4. 若能通过，最多有6种这样的合法交点，若 $ |u_{1} - u_{2}| < \epsilon$，则将所有合法的交点当作初始点进行牛顿迭代，返回最近的一个交点；否则转5；
+4. 若能通过，最多有6种这样的合法交点，若|u1-u2| < epsilon，则将所有合法的交点当作初始点进行牛顿迭代，返回最近的一个交点；否则转5；
 
-5. 对区间 $[u_{1},u_{2}]$ 二分，转2；
+5. 对区间 [u1, u2] 二分，转2；
 
 #### 具体代码
 
@@ -359,35 +357,22 @@ void KdPoints::update(const Vec3 &photon, const Color &color, const Vec3 &n)
 
 我的做法是先生成一张 4096 x 3072 的图片，再使用下采样将其缩小成 1024 x 768 的图片，对比效果如下：
 
-<img src="resized1.png" width="450px">
-<img src="3000_10.png" width="450px">
+<img src="img/resized1.png" width="450px">
+<img src="img/3000_10.png" width="450px">
 
-<div align="center">
-<span style="margin-right: 45%;">有SSAA</span>  <span align="center">无SSAA</span>
-</div>
-<br>
 仔细观察图像边缘，效果提升比较明显。
 
 ## 最终结果
 
-<img src="final3.png">
+<img src="img/final3.png">
 
 另外我尝试了一下初始半径对图片的影响
 
-<img src="3000_1.png" width="450px">
-<img src="3000_3.png" width="450px">
-
-<div align="center">
-<span style="margin-right: 45%;">$R_{0}^{2} = 1$</span>  <span align="center">$R_{0}^{2} = 3$</span>
-</div>
-<br>
-<img src="3000_5.png" width="450px">
-<img src="3000_10.png" width="450px">
-<div align="center">
-<span style="margin-right: 45%;">$R_{0}^{2} = 5$</span>  <span align="center">$R_{0}^{2} = 10$</span>
-</div>
-<br>
-上面的结果都是跑了$3\times10^{7}$个光子生成的大小为 1024 x 768 的图，可以看到，虽然理论上PPM可以通过不断投射光子达到任意的精度，但初始半径的设置对图片的收敛速度和图片的效果有着一定的影响。可以看到随着R的增大，图片变得更加柔和，达到可接受的效果速度更快，但也存在一定的失真现象。因此，选择合适的初始半径，需要在效率和精度二维中找到一个折中点。
+<img src="img/3000_1.png" width="450px">
+<img src="img/3000_3.png" width="450px">
+<img src="img/3000_5.png" width="450px">
+<img src="img/3000_10.png" width="450px">
+上面的结果都是跑了3x10^7个光子生成的大小为 1024 x 768 的图，可以看到，虽然理论上PPM可以通过不断投射光子达到任意的精度，但初始半径的设置对图片的收敛速度和图片的效果有着一定的影响。可以看到随着R的增大，图片变得更加柔和，达到可接受的效果速度更快，但也存在一定的失真现象。因此，选择合适的初始半径，需要在效率和精度二维中找到一个折中点。
 
 ## 参考文献
 
